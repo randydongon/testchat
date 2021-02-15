@@ -1,0 +1,86 @@
+.chat__root {
+  text-align: center;
+  flex-direction: column;
+  display: flex;
+}
+
+.chat__body {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+.chatdialog__div {
+  display: flex;
+  position: absolute;
+  right: 0;
+  width: 300px;
+  height: 60vh;
+  margin-right: 1rem;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 0.3rem;
+  flex-direction: column;
+
+  padding-bottom: 1rem;
+  bottom: 0;
+  margin-bottom: 0.5rem;
+  box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.5);
+}
+.chatdialog__header {
+  display: flex;
+  border: 1px solid #eee;
+  width: inherit;
+  padding: 0.5rem 0;
+  padding-left: 0.5rem;
+  align-items: center !important;
+}
+
+.chatdialog__iconbtn {
+  display: flex !important;
+  position: absolute !important;
+  right: 0 !important;
+}
+
+.chatdialog__inputdiv {
+  display: flex;
+  position: absolute;
+  align-items: flex-end;
+  bottom: 0;
+  padding: 0 0.5rem !important;
+  width: inherit;
+  margin-bottom: 0.5rem;
+  margin-top: 2rem !important;
+}
+.chatdialog__form {
+  display: flex;
+  width: inherit;
+  flex-direction: row;
+}
+.chatdialog__formcontrol {
+  display: flex !important;
+  flex-direction: row !important;
+  width: inherit;
+}
+
+.chat_input {
+  flex: 1;
+}
+.chat_iconbutn {
+  display: flex;
+  flex: 0 !important;
+}
+
+.chatdialog__p {
+  padding-right: 1rem;
+}
+.chatdialog__message {
+  padding: 5% 0.5rem;
+  overflow: auto;
+  flex: auto;
+  text-align: right;
+  margin-bottom: 2rem;
+  scroll-behavior: smooth;
+}
+.chatdialog__scroll {
+  margin-top: 2rem;
+}

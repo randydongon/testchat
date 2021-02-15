@@ -1,0 +1,26 @@
+const Images = {
+  randy: require("../../images/randy.jpg"),
+  nopic: require("../../images/nopic.png"),
+  back: require("../../images/back.jpg"),
+  choosefile: require("../../images/nopic.png"),
+  input_file: require("../../images/ic_photo.png"),
+  sticker: require("../../images/ic_sticker.png"),
+  wave_hand: require("../../images/wave_hand.gif"),
+  send: require("../../images/ic_send.png"),
+  lego1: require("../../images/lego1.gif"),
+  lego2: require("../../images/lego2.gif"),
+  lego3: require("../../images/lego3.png"),
+  lego4: require("../../images/lego4.png"),
+  lego5: require("../../images/lego5.png"),
+  lego6: require("../../images/lego6.png"),
+  mimi1: require("../../images/mimi1.gif"),
+  mimi2: require("../../images/mimi2.gif"),
+  mimi4: require("../../images/mimi4.gif"),
+  mimi5: require("../../images/mimi5.gif"),
+  mimi6: require("../../images/mimi6.gif"),
+  mimi7: require("../../images/mimi7.gif"),
+  mimi8: require("../../images/mimi8.gif"),
+  mimi9: require("../../images/mimi9.gif"),
+};
+
+export default Images;

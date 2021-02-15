@@ -1,0 +1,37 @@
+.messages__message {
+  padding: 5px;
+  margin: 5px;
+  width: fit-content;
+}
+.message {
+  padding: 5px;
+  margin: 5px;
+  width: fit-content;
+}
+.message_card {
+  margin-left: auto;
+  color: white;
+  text-align: right !important;
+}
+.message_userCard {
+  background-color: #0b81ff !important;
+  padding: 0 !important;
+  color: #fff !important;
+  border-radius: 1.5rem !important;
+}
+.message_guestCard {
+  background: #ccc !important;
+  padding: 0 !important;
+  border-radius: 1.5rem !important;
+  color: black !important;
+}
+.messages__typo {
+  word-wrap: break-word !important;
+  padding: 0rem 0.5rem !important;
+  font-size: 15px !important;
+  font-weight: 300 !important;
+}
+
+.messages__cardcontent {
+  padding: 3px 10px !important;
+}

@@ -1,0 +1,40 @@
+.list__renderuser {
+  text-align: center;
+  overflow-y: scroll;
+
+  overscroll-behavior-y: contain;
+  scroll-snap-type: y proximity;
+  min-height: 200px;
+  max-height: 360px;
+}
+.renderuser__div {
+}
+
+.renderuser__menu {
+  display: flex !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 10vh !important;
+}
+
+.renderuser__header {
+  border-bottom: 1px solid #eee;
+  padding: 0.5rem 1rem;
+}
+
+.render__input {
+  display: flex;
+  flex: 1;
+  height: 20px;
+  outline: none;
+  border: 1px solid #eee;
+  font-size: 15px;
+  padding: 3px 10px;
+  border-radius: 1rem;
+  justify-content: left;
+  cursor: pointer;
+}
+
+.render__input :hover {
+  background-color: #ccc;
+}
