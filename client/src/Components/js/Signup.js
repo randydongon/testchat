@@ -174,11 +174,11 @@ const Signup = forwardRef(({ open, setOpen }, ref) => {
 
     const data = await resp.json();
 
-    if (data.status_code == 400) {
+    if (data.status_code === 400) {
       console.log(data.message);
       alert(data.message);
     }
-    if (data.status_code == 200) {
+    if (data.status_code === 200) {
       alert(data.message);
       setOpen(false);
       setUserName("");

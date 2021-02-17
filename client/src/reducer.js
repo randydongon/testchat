@@ -9,6 +9,7 @@ export const initialState = {
   isChatOpen: false,
   peer_url: "",
   request_status: false,
+  notify: false,
 };
 
 const reducer = (state, action) => {
@@ -26,16 +27,18 @@ const reducer = (state, action) => {
         user_name: action.user_name,
         user_id: action.user_id,
         email: action.email,
-        photo_url: action.photo_url,
         isLogin: action.isLogin,
+        peerid: action.peerid,
+        peername: action.peername,
+        isChatOpen: action.isChatOpen,
       };
-    case "CHATROOM_IS_OPEN":
+    case "CHATROOM_OPEN":
       return {
         ...state,
         isChatOpen: action.isChatOpen,
         peerid: action.peerid,
         peername: action.peername,
-        peer_url: action.peer_url,
+        notify: action.notify,
       };
 
     default:

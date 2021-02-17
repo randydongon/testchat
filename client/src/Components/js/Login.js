@@ -4,8 +4,11 @@ import { TextField, Button, Card, Input, Divider } from "@material-ui/core";
 import { useStateValue } from "../../StateProvider";
 import { Link } from "react-router-dom";
 import Signup from "./Signup";
+import io from "socket.io-client";
 
 const API = process.env.REACT_APP_API;
+
+const socket = io("http://localhost:9000");
 
 const BootstrapButton = withStyles({
   root: {
@@ -120,11 +123,11 @@ const Login = ({ history, setLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (email == "") {
+    if (email === "") {
       console.log("Email address not be empty");
       return;
     }
-    if (password == "") {
+    if (password === "") {
       console.log("Password must not be empty!");
       return;
     }
@@ -158,7 +161,20 @@ const Login = ({ history, setLogin }) => {
 
       localStorage.setItem("currentuser", JSON.stringify(currentuser));
 
-      history.push("/chat");
+      const resp = await fetch(`${API}/update`, {
+        method: "PUt",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          isLogin: false,
+          email: email,
+        }),
+      });
+      // const data = await resp.json();
+      socket.emit("message", { text: { isLogin: true } });
+
+      // history.push("/chat");
       setPassword("");
       setEmail("");
     }
@@ -201,9 +217,11 @@ const Login = ({ history, setLogin }) => {
           </Button>
         </form>
         <Divider className={classes.divider} />
-        <BootstrapButton type="submit" onClick={() => setOpen(true)}>
-          Create New Account
-        </BootstrapButton>
+        <Link to="/chat">
+          <BootstrapButton type="submit" onClick={() => setOpen(true)}>
+            Create New Account
+          </BootstrapButton>
+        </Link>
       </Card>
       <Signup open={open} setOpen={setOpen} />
     </div>

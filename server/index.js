@@ -37,27 +37,50 @@ const db = client.db(dbName);
 // });
 // sk = io(server);
 
+db.on("error", console.error.bind(console, "Connection Error:"));
+io.listen(9000, () => {
+  console.log("Listening on port 9000");
+});
+
 io.on("connection", (socket) => {
   socket.on("message", ({ text }) => {
+    // console.log(text);
+    // const inbox = "inbox";
     console.log(text);
+    if (text.isLogin === true) {
+      io.emit("message", text);
+    } else if (text.status === "request") {
+      console.log(text);
+      io.emit("message", text);
+    }
+
+    const coll = db.collection(`messages.${text.conver_id}.inbox`);
+    // const id_col = coll[text.user_id];
+    // const inbox_col = id_col.inbox;
+    const changeStreams = coll.watch();
+
+    changeStreams.on("change", (change) => {
+      console.log(change.fullDocument);
+
+      io.emit("message", change.fullDocument);
+    });
   });
 });
 
-db.on("error", console.error.bind(console, "Connection Error:"));
+// db.once("open", () => {
+//   io.listen(9000, () => {
+//     console.log("Listening on port 9000");
+//   });
+//   const coll = db.collection("messages");
 
-db.once("open", () => {
-  io.listen(9000, () => {
-    console.log("Listening on port 9000");
-  });
-  const coll = db.collection("messages");
-  const changeStreams = coll.watch();
+//   const changeStreams = coll.watch();
 
-  changeStreams.on("change", (change) => {
-    console.log(change.fullDocument);
+//   changeStreams.on("change", (change) => {
+//     console.log(change.fullDocument);
 
-    io.emit("message", change.fullDocument);
-  });
-});
+//     io.emit("message", change.fullDocument);
+//   });
+// });
 
 // db.on("error", console.error.bind(console, "Connection Error:"));
 

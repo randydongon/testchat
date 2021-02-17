@@ -18,6 +18,8 @@ import { IoMdCodeWorking } from "react-icons/io";
 import SearchIcon from "@material-ui/icons/Search";
 import SearchUser from "./SearchUser";
 
+const API = process.env.REACT_APP_API;
+
 const useStyles = makeStyles((theme) => ({
   avatar: {
     backgroundColor: blue[100],
@@ -65,57 +67,64 @@ const useStyles = makeStyles((theme) => ({
 export default function RenderUser({ profile }) {
   const classes = useStyles();
 
-  const [open, setOpen] = useState(false);
-  const isMenuOpen = Boolean(true);
-
   const [{ isLogin }, dispatch] = useStateValue();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [userId, setUserId] = useState("");
-  const [request, setRequest] = useState(false);
-  const [notification, setNotification] = useState(0);
 
-  const handleListItemClick = (item) => {
-    // props.setAnchorE(null);
-    console.log("click item ", item);
+  const [request, setRequest] = useState(false);
+  const [chat, setChat] = useState(false);
+
+  const handleListItemClick = (e, item) => {
+    e.preventDefault();
+    handleChat();
     if (!isLogin) {
       alert("Please login to chat with friends");
       return;
     }
+
+    localStorage.removeItem("peeruser");
 
     const peeruser = {
       peerid: item.id,
       peername: item.name,
     };
     localStorage.setItem("peeruser", JSON.stringify(peeruser));
+    // console.log(item, " item ");
 
     dispatch({
-      type: "CHATROOM_IS_OPEN",
-      isChatOpen: true,
-      peername: item.name,
+      type: "CHATROOM_OPEN",
+      isChatOpen: chat,
       peerid: item.id,
+      peername: item.name,
+      notify: true,
     });
   };
 
-  const handleAnchorEl = (e, id) => {
-    setAnchorEl(e.currentTarget);
-    setUserId(id);
+  const handleAnchorEl = (e) => {
+    // setAnchorEl(e.currentTarget);
   };
 
   const handleMouseEnter = (id) => {
-    document.getElementById(id).style.display = "block";
+    try {
+      document.getElementById(id).style.display = "block";
+    } catch (e) {
+      console.log(e);
+    }
   };
   const handleMouseLeave = (id) => {
-    document.getElementById(id).style.display = "none";
+    try {
+      document.getElementById(id).style.display = "none";
+    } catch (e) {}
   };
-  useEffect(() => {
-    // profile.map((item) => console.log(item.name, item.id, item.email));
-  }, []);
+  //   useEffect(() => {
+  //     // profile.map((item) => console.log(item.name, item.id, item.email));
+  //   }, []);
 
   const handleSendRequest = (e) => {
     e.preventDefault();
   };
 
-  useEffect(() => {}, []);
+  const handleChat = () => {
+    setChat(!chat);
+  };
 
   return (
     <div>
@@ -146,7 +155,7 @@ export default function RenderUser({ profile }) {
           </div>
 
           <List className="list__renderuser">
-            {profile?.length > 0
+            {profile?.length
               ? profile.map((item, index) => (
                   <div
                     onMouseLeave={() => handleMouseLeave(item.id)}
@@ -165,10 +174,7 @@ export default function RenderUser({ profile }) {
                       button
                       onMouseEnter={() => handleMouseEnter(item.id)}
                     >
-                      <div
-                        style={{ display: "flex", alignItems: "center" }}
-                        onClick={() => handleListItemClick(item)}
-                      >
+                      <div style={{ display: "flex", alignItems: "center" }}>
                         <ListItemAvatar>
                           <Badge
                             badgeContent={item.notification}
@@ -190,6 +196,9 @@ export default function RenderUser({ profile }) {
                         </ListItemAvatar>
                         <ListItemText primary={item.name} />
                       </div>
+                      <button onClick={(e) => handleListItemClick(e, item)}>
+                        Chat
+                      </button>
                       <div
                         style={{
                           width: "3rem",
@@ -202,7 +211,7 @@ export default function RenderUser({ profile }) {
                       >
                         <IconButton
                           id={item.id}
-                          onClick={(e) => handleAnchorEl(e, item.id)}
+                          onClick={handleAnchorEl}
                           className={classes.moreIcon}
                         >
                           <MoreVertOutlined

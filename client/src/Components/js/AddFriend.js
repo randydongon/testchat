@@ -9,8 +9,11 @@ import InboxIcon from "@material-ui/icons/MoveToInbox";
 import DraftsIcon from "@material-ui/icons/Drafts";
 import SendIcon from "@material-ui/icons/Send";
 import { useStateValue } from "../../StateProvider";
+import io from "socket.io-client";
 
 const API = process.env.REACT_APP_API;
+
+const socket = io("http://localhost:9000");
 
 const StyledMenu = withStyles({
   paper: {
@@ -55,7 +58,8 @@ const AddFriend = forwardRef(({ anchorEl, setAnchorEl, userItem }, ref) => {
   };
 
   const handleRequest = async () => {
-    console.log(userItem.id, userItem.name, "peerid, peername");
+    // console.log(userItem.id, userItem.name, "peerid, peername");
+
     const resp = await fetch(`${API}/friend/request`, {
       method: "PUT",
       headers: {
@@ -70,8 +74,31 @@ const AddFriend = forwardRef(({ anchorEl, setAnchorEl, userItem }, ref) => {
       }),
     });
 
-    const data = await resp;
-    console.log(data);
+    let alert = false;
+    try {
+      const resp_data = await resp.json();
+      if (resp_data.status === 201) {
+        console.log("Friend already added!");
+      } else if (resp_data.status === 200) {
+        socket.emit("message", {
+          text: {
+            status: "request",
+            peerid: userItem.id,
+            peername: userItem.name,
+            friend: user_name,
+          },
+        });
+        alert = true;
+      }
+    } catch (e) {
+      console.log(e);
+    }
+
+    // const data = await resp;
+    // console.log(data);
+    if (alert) {
+      // socket.close();
+    }
 
     setAnchorEl(null);
   };
@@ -108,3 +135,19 @@ const AddFriend = forwardRef(({ anchorEl, setAnchorEl, userItem }, ref) => {
   );
 });
 export default AddFriend;
+// .then((resp) => {
+//   console.log(resp);
+//   if (resp.status === 200) {
+//     socket.emit("message", {
+//       text: { status: "request", peerid: peerid },
+//     });
+//   } else if (resp.status === 201) {
+//     console.log(resp, "status 201");
+//   } else {
+//     console.log(resp, "alert");
+//     alert(resp.message);
+//   }
+// })
+// .catch(console.error)
+
+// .finally(() => socket.close());

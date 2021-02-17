@@ -17,14 +17,13 @@ function App() {
   return (
     <div className="App">
       <Navbar />
-      <div>
-        <Switch>
-          <Route exact path="/" component={Home} />
-          <Route path="/login" component={Login} />
-          <Route path="/profile" component={Profile} />
-          <Route path="/chat" component={Chat} />
-        </Switch>
-      </div>
+
+      <Switch>
+        <Route exact path="/home" component={Home} />
+        <Route path="/login" component={Login} />
+        <Route path="/profile" component={Profile} />
+        <Route path="/chat" component={Chat} />
+      </Switch>
     </div>
   );
 }

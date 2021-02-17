@@ -366,3 +366,12 @@ input::placeholder {
   height: 40px;
   margin-left: 10px;
 }
+.messages {
+  height: 342px;
+  overflow-y: auto;
+  padding: 15px 10px;
+}
+.Chat {
+  height: 342px;
+  overflow-y: auto;
+}

@@ -91,8 +91,8 @@ export default function FriendRequest({
       },
       body: JSON.stringify({
         _id: user_id,
-        peerid: doc.id,
-        peername: doc.name,
+        id: doc.id,
+        name: doc.name,
       }),
     })
       .then(console.log)
@@ -101,8 +101,8 @@ export default function FriendRequest({
         dispatch({ type: "FRIEND_REQUEST", request_status: true })
       );
 
-    console.log(doc.name, doc.id);
-    console.log(`${API}`, user_id);
+    // console.log(doc.name, doc.id);
+    // console.log(`${API}`, user_id);
   };
 
   return (

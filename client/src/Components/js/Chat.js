@@ -8,8 +8,10 @@ import Paper from "@material-ui/core/Paper";
 import { Button, Typography } from "@material-ui/core";
 import RenderUser from "./RenderUser";
 import { useStateValue } from "../../StateProvider";
-
+import io from "socket.io-client";
 const API = process.env.REACT_APP_API;
+
+const socket = io("http://localhost:9000");
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
   lefttop: {
     display: "flex",
     flex: 0,
-    justifyContent: "space-between",
+
     "& > *": {
       margin: theme.spacing(1),
       height: "fit-content",
@@ -77,11 +79,18 @@ const Chat = forwardRef(({ history }, ref) => {
   const classes = useStyles();
   const [profile, setProfile] = useState([]);
   const [
-    { user_name, user_id, email, isChatOpen, peername, peerid, isLogin },
+    {
+      user_name,
+      user_id,
+      email,
+      isChatOpen,
+      peername,
+      peerid,
+      isLogin,
+      notify,
+    },
     dispatch,
   ] = useStateValue();
-
-  console.log(isChatOpen, "chat open");
 
   const fetchData = useCallback(async () => {
     const resp = await fetch(`${API}/request/list/${user_id}`);
@@ -89,12 +98,13 @@ const Chat = forwardRef(({ history }, ref) => {
 
     try {
       const newData = data[0].friends_list.filter((doc) => doc.id !== user_id);
-      console.log(newData);
+
+      // console.log(newData);
       setProfile(
         newData.map((doc) => ({
-          name: doc.peername,
-          id: doc.peerid,
-          notification: doc.notification,
+          name: doc.name,
+          id: doc.id,
+          // notification: doc.notification,
         }))
       );
     } catch (e) {
@@ -104,18 +114,30 @@ const Chat = forwardRef(({ history }, ref) => {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, notify]);
 
-  // console.log(profile, "notification");
+  useEffect(() => {
+    socket.on("message", fetchRequest);
+  }, []);
+
+  const fetchRequest = (data) => {
+    if (data.peerid === user_id) {
+      console.log(data, "request add friend");
+      alert(data.friend + ": Hi, I'll add you on my friends list thansk!");
+    }
+  };
 
   return (
     <div ref={ref} className={classes.root}>
       <Paper ref={ref} variant="outlined" className={classes.leftpane}>
         <div className={classes.lefttop}>
-          <Avatar alt="Cindy Baker" src={randy} />
-          <Button color="primary" variant="contained">
+          <Avatar alt="pic" src={randy} />
+          <Typography variant="body2" component="span">
+            {user_name}
+          </Typography>
+          {/* <Button color="primary" variant="contained">
             Logout
-          </Button>
+          </Button> */}
         </div>
         <div ref={ref} className={classes.leftbody}>
           <Typography variant="h6" component="h6">

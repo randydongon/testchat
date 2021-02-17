@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import CardActions from "@material-ui/core/CardActions";
 import Avatar from "@material-ui/core/Avatar";
@@ -21,6 +21,9 @@ import Card from "@material-ui/core/Card";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardMedia from "@material-ui/core/CardMedia";
 import CardContent from "@material-ui/core/CardContent";
+import { Typography } from "@material-ui/core";
+import lego6 from "../../images/lego6.png";
+import Badge from "@material-ui/core/Badge";
 
 const API = process.env.REACT_APP_API;
 
@@ -93,6 +96,10 @@ const useStyles = makeStyles((theme) => ({
   card__iconbutton: {
     flex: 0,
   },
+  customBadge: {
+    backgroundColor: "#81b622",
+    color: "white",
+  },
 }));
 
 export default function ChatBox() {
@@ -100,81 +107,79 @@ export default function ChatBox() {
 
   const [input, setInput] = useState("");
   const [conversations, setConversations] = useState([]);
-  const [{ user_name, user_id, peername, peerid }, dispatch] = useStateValue();
+  const [login, setLogin] = useState(false);
+  const [stream, setStream] = useState(false);
+  const [
+    { user_name, user_id, peername, peerid, isChatOpen, isLogin },
+    dispatch,
+  ] = useStateValue();
+  const [peern, setPeern] = useState("");
 
-  console.log(
-    peerid,
-    peername,
-    JSON.parse(localStorage.getItem("peeruser")),
-    " peerid peername"
-  );
+  // generate conversation id
+  const conversationId = () => {
+    const peeruser = JSON.parse(localStorage.getItem("peeruser"));
+    let peerhexid = peeruser.peerid;
+    peerhexid = peerhexid.split("-");
 
-  const addMessage = useCallback(
-    (data) => {
-      setConversations((prevConversations) => {
-        let madeChange = false;
-        const newMessage = data;
-        const newConversations = prevConversations.map((conversation) => {
-          if (arrayEquality(conversation.username, user_name)) {
-            madeChange = true;
-            return {
-              ...conversation,
-              ...newMessage,
-            };
-          }
-          // console.log(conversation);
+    let peerhexidstr = "";
 
-          return conversation;
-        });
+    for (let i = 3; i < peerhexid.length; i++) {
+      peerhexidstr = peerhexidstr.concat(peerhexid[i]);
+    }
 
-        if (madeChange) {
-          return newConversations;
-        } else {
-          return [...prevConversations, { ...newMessage }];
-        }
-      });
-    },
-    [setConversations, user_name]
-  );
+    const userhexid = user_id.split("-");
+    let userhexidstr = "";
 
-  useEffect(() => {
-    if (socket == null) return;
-    socket.on("message", addMessage);
+    for (let i = 3; i < userhexid.length; i++) {
+      userhexidstr = userhexidstr.concat(userhexid[i]);
+    }
 
-    return () => socket.close();
-  }, [addMessage]);
+    const converId = parseInt(userhexidstr, 16) + parseInt(peerhexidstr, 16);
+    return converId;
+  };
 
-  function arrayEquality(a, b) {
-    if (a.length !== b.length) return false;
-
-    a.sort();
-    b.sort();
-
-    return a.every((element, index) => {
-      return element === b[index];
-    });
-  }
-
-  const fetchData = useCallback(async () => {
-    const resp = await fetch(`${API}/receivemessage`);
+  const fetchData = async () => {
+    const resp = await fetch(`${API}/receivemessage/${conversationId()}`);
+    console.log(conversationId(), "coversation ID");
     const data = await resp.json();
+    // console.log(data);
     setConversations(
       data.map((doc) => ({
-        username: doc.username,
+        username: doc.fromname,
+        id: doc.fromid,
+        peerid: doc.toid,
+        peername: doc.toname,
         text: doc.text,
         datesend: doc.datesend,
       }))
     );
-  }, [setConversations]);
+    setStream(!stream);
+  };
+  useEffect(async () => {
+    // const peeruser = JSON.parse(localStorage.getItem("peeruser"));
+    // console.log(user_id, "user id", peeruser.peerid, " peer id");
+    fetchData();
+  }, [isChatOpen]);
+
+  useEffect(() => {
+    if (socket == null) return;
+    socket.on("message", fetchData);
+
+    // return () => socket.close();
+  }, []);
+
+  // console.log(user_id, peerid);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [isChatOpen]);
 
+  // send message
   const handleSendMessage = async (e) => {
     e.preventDefault();
     console.log("send message");
     const peeruser = JSON.parse(localStorage.getItem("peeruser"));
+
     // setMessages([...messages, { username: username, text: input }]);
     await fetch(`${API}/sendmessage`, {
       method: "POST",
@@ -187,12 +192,13 @@ export default function ChatBox() {
         id: user_id,
         toid: peeruser.peerid,
         toname: peeruser.peername,
+        conversation_id: conversationId(),
       }),
     })
       .then((resp) => {
         // console.log(resp);
         socket.emit("message", {
-          text: { input, user_id: user_id, peerid: peerid },
+          text: { conver_id: conversationId(), status: "request" },
         });
       })
       .catch(console.error)
@@ -203,27 +209,94 @@ export default function ChatBox() {
     setInput("");
   };
 
+  //handle notification update when chatbox is open
+
+  const notification = useCallback(async () => {
+    const peeruser = JSON.parse(localStorage.getItem("peeruser"));
+
+    const resp = await fetch(`${API}/sendmessage`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        _id: user_id,
+        peerid: peeruser.peerid,
+      }),
+    });
+  }, [user_id]);
+
+  useEffect(() => {
+    notification();
+  }, [notification]);
+
+  useEffect(
+    (socketdata) => {
+      const peeruser = JSON.parse(localStorage.getItem("peeruser"));
+      setPeern(peeruser.peername);
+
+      setLogin(socketdata?.isLogin);
+
+      // console.log(socketdata, " socket on");
+    },
+    [isChatOpen]
+  );
+
+  // check peer user is login
+  useEffect(() => {
+    async function fetchData() {
+      const peeruser = JSON.parse(localStorage.getItem("peeruser"));
+
+      const resp = await fetch(`${API}/profile/${peeruser.peerid}`);
+      const data = await resp.json();
+
+      setLogin(data.isLogin);
+    }
+    fetchData();
+  }, [isLogin]);
+
+  // useEffect(() => {
+  //   socket.on("message", getProfile);
+  // }, []);
+
+  console.log(peern, "peern");
   return (
     <Card className={classes.root}>
       <CardHeader
         className={classes.card__header}
         avatar={
-          <Avatar aria-label="recipe" className={classes.avatar}>
-            R
-          </Avatar>
+          <Badge
+            classes={isChatOpen && { badge: classes.customBadge }}
+            className=""
+            overlap="circle"
+            badgeContent=" "
+            variant="dot"
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+          >
+            <Avatar alt="pic" src={lego6} className={classes.avatar}>
+              {peern[0]}
+            </Avatar>
+          </Badge>
         }
         action={
           <IconButton aria-label="settings">
             <MoreVertIcon />
           </IconButton>
         }
-        title="Peer user"
+        title={
+          <Typography variant="h6" component="h6">
+            {peern}
+          </Typography>
+        }
         subheader="September 14, 2016"
       />
       {/* <img
         className={classes.media}
         src="/static/images/cards/paella.jpg"
-        alt="Paella dish"
+        alt="Paella dish" messages  chatdialog__message
       /> */}
 
       <CardContent className={classes.card__content}>
@@ -268,3 +341,54 @@ export default function ChatBox() {
     </Card>
   );
 }
+
+const MyScrollToBottom = () => {
+  const divRef = useRef(null);
+
+  useEffect(() => {
+    divRef.current.scrollIntoView({ behavior: "smooth" });
+  });
+
+  return <div ref={divRef} />;
+};
+// const addMessage = useCallback(
+//   (data) => {
+//     if (conversations.length <= 0) return;
+//     setConversations((prevConversations) => {
+//       let madeChange = false;
+//       const newMessage = data;
+//       const newConversations = prevConversations.map((conversation) => {
+//         console.log(conversation, "conversation");
+//         if (arrayEquality(conversation.peername, user_name)) {
+//           madeChange = true;
+//           return {
+//             ...conversation,
+//             ...newMessage,
+//           };
+//         }
+//         console.log(conversation);
+
+//         return conversation;
+//       });
+
+//       if (madeChange) {
+//         return newConversations;
+//       } else {
+//         return [...prevConversations, { ...newMessage }];
+//       }
+//     });
+//   },
+//   [setConversations, user_name]
+// );
+
+// function arrayEquality(a, b) {
+//   console.log(a, b, "equality");
+//   if (a.length !== b.length) return false;
+
+//   a.sort();
+//   b.sort();
+
+//   return a.every((element, index) => {
+//     return element === b[index];
+//   });
+// }

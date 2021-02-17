@@ -17,7 +17,7 @@ const useStyles = makeStyles({
 
 const Message = forwardRef(({ message, username }, ref) => {
   const classes = useStyles();
-  const isUser = username == message.username;
+  const isUser = username === message.username;
 
   //message date
   const formatDate = (value) => {

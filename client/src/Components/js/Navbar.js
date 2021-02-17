@@ -14,8 +14,10 @@ import PersonAddIcon from "@material-ui/icons/PersonAdd";
 import { useStateValue } from "../../StateProvider";
 import FriendRequest from "./FriendRequest";
 import Badge from "@material-ui/core/Badge";
+import io from "socket.io-client";
 
 const API = process.env.REACT_APP_API;
+const socket = io("http://localhost:9000");
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,12 +31,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Navbar() {
+export default function Navbar({ history }) {
   const classes = useStyles();
-  const [
-    { isLogin, peerid, user_id, request_status },
-    dispatch,
-  ] = useStateValue();
+  const [{ isLogin, peerid, user_id, user_name }, dispatch] = useStateValue();
   const [anchorEl, setAnchorEl] = useState(null);
   const [friendrequest, setFriendRequest] = useState([]);
   // const [requestCount, setRequestCount] = useState(0)
@@ -45,8 +44,10 @@ export default function Navbar() {
 
   const handeleLogOut = (e) => {
     e.preventDefault();
+    console.log(user_id, " logout");
+    userLogOut();
     dispatch({
-      type: "IS_USER_LOGIN",
+      type: "CURRENT_USER",
       isLogin: false,
     });
     localStorage.clear();
@@ -74,6 +75,26 @@ export default function Navbar() {
   useEffect(() => {
     fetchFriendRequest();
   }, [fetchFriendRequest, peerid]);
+
+  const userLogOut = async () => {
+    await fetch(`${API}/update`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        isLogin: true,
+        user_id: user_id,
+      }),
+    })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch(console.error)
+      .finally(() => {
+        // socket.emit("messsage", { text: { user_name: user_name } });
+      });
+  };
 
   return (
     <div className={classes.root}>
@@ -103,7 +124,9 @@ export default function Navbar() {
           </div>
 
           {isLogin ? (
-            <Button onClick={handeleLogOut}>Log Out</Button>
+            <Link to="/home" onClick={handeleLogOut}>
+              Log Out
+            </Link>
           ) : (
             <Link to="/login">
               <Button color="inherit">Log In</Button>
